@@ -74,12 +74,35 @@ namespace MVCalc
             return model;
         }
 
-        private void Calculate()
+        public static double Moment(double P, double loc, double x, double L)
+        {
+            double R = P * x / L;
+            if (loc < x)
+            {
+                return R * (L - loc) - P * (x - loc);
+            }
+            else
+            {
+                return R * (L - loc);
+            }
+        }
+
+        public static double Shear(double P, double loc, double x, double L)
+        {
+            double R = P * x / L;
+            if (loc < x)
+            {
+                return P - R;
+            }
+            else
+            {
+                return -R;
+            }
+        }
+
+        public Dictionary<string, double> CalculateLocation(double xLocation)
         {
             double spanLength = 0;
-            double xLocation = 0;
-            bool? feet = false;
-            bool? pct = false;
             double incr = 0;
             double impactFactor = 0;
             double distFactor = 0;
@@ -87,13 +110,6 @@ namespace MVCalc
             try
             {
                 spanLength = double.Parse(SpanLength.Text);
-                xLocation = double.Parse(xLoc.Text);
-                feet = RadioFeet.IsChecked;
-                pct = RadioPct.IsChecked;
-                if ((bool)pct)
-                {
-                    xLocation = spanLength * xLocation;
-                }
                 incr = double.Parse(Increment.Text) / 12;
                 impactFactor = double.Parse(ImpactFactor.Text);
                 distFactor = double.Parse(DistributionFactor.Text);
@@ -108,81 +124,97 @@ namespace MVCalc
             List<double> axleSpaces = new List<double> { 0, 8, 5, 5, 5, 9, 5, 6, 5,
                                                          8, 8, 5, 5, 5, 9, 5, 6, 5, 5.5 };
 
-            double trainLen = axleSpaces.Sum();
-            while (axleSpaces.Sum() - trainLen < spanLength)
+            int numAxles = axleSpaces.Count();
+
+            double[] axlePositions = new double[numAxles];
+            axlePositions[0] = -axleSpaces[0];
+            for (int i = 1; i < numAxles; i++)
             {
-                axleSpaces.Add(1);
-                axleLoads.Add(8);
+                    axlePositions[i] = axlePositions[i - 1] - axleSpaces[i];
             }
+            double mMaxVal = 0;
+            double vMaxVal = 0;
+            double mMaxLoc = 0;
+            double vMaxLoc = 0;
 
-            int numAxles = axleLoads.Count();
-            double trainTot = axleSpaces.Sum();
-
-            List<double> positions = new List<double> { };
-            double point = -spanLength;
-            while (point <= trainTot)
+            while (axlePositions.Min() < spanLength)
             {
-                positions.Add(point);
-                point += incr;
-            }
-
-            List<double> mArray = new List<double> { };
-            List<double> vArray = new List<double> { };
-
-            for (int i = 0; i < positions.Count(); ++i)
-            {
-                List<double> a = new List<double> { };
-                List<double> b = new List<double> { };
-                List<double> r1 = new List<double> { };
-                List<double> r2 = new List<double> { };
-                List<double> m = new List<double> { };
-                List<double> v = new List<double> { };
-
-                for (int j = 0; j < numAxles; ++j)
+                List<double> loadsOnBridge = new List<double>();
+                List<double> axlesOnBridge = new List<double>();
+                for (int j = 0; j < axlePositions.Count(); j++)
                 {
-                    double aVal = spanLength + positions[i] - axleSpaces.Take(j + 1).Sum();
-                    a.Add(aVal);
-
-                    double bVal = spanLength - aVal;
-                    b.Add(bVal);
-
-                    double mVal;
-                    if ((0 < bVal) && (bVal < spanLength) && (aVal > xLocation))
-                        mVal = axleLoads[j] * (aVal - xLocation);
-                    else
-                        mVal = 0;
-                    m.Add(mVal);
-
-                    double vVal;
-                    if ((0 < bVal) && (bVal < spanLength) && (aVal < xLocation))
-                        vVal = axleLoads[j];
-                    else
-                        vVal = 0;
-                    v.Add(vVal);
-
-                    double r1Val;
-                    r1Val = ((bVal > 0) && (bVal < spanLength)) ? axleLoads[j] * bVal / spanLength : 0;
-                    r1.Add(r1Val);
-
-                    double r2Val;
-                    r2Val = ((0 < aVal) && (aVal < spanLength)) ? axleLoads[j] * aVal / spanLength : 0;
-                    r2.Add(r2Val);
+                    if (axlePositions[j] > 0 && axlePositions[j] < spanLength)
+                    {
+                        loadsOnBridge.Add(axleLoads[j]);
+                        axlesOnBridge.Add(axlePositions[j]);
+                    }
                 }
 
-                double mTot = r2.Sum() * (spanLength - xLocation) - m.Sum();
-                double vTot = Math.Abs(r1.Sum() - v.Sum());
-                mArray.Add(mTot);
-                vArray.Add(vTot);
+                double[] moments = new double[loadsOnBridge.Count()];
+                double[] shears = new double[loadsOnBridge.Count()];
+                for (int j = 0; j < loadsOnBridge.Count(); j++)
+                {
+                    moments[j] = Moment(loadsOnBridge[j], xLocation, axlesOnBridge[j], spanLength);
+                    shears[j] = Shear(loadsOnBridge[j], xLocation, axlesOnBridge[j], spanLength);
+                }
+
+                double momentTotal = moments.Sum();
+                double shearTotal = Math.Abs(shears.Sum());
+
+                if (momentTotal > mMaxVal)
+                {
+                    mMaxVal = momentTotal;
+                    mMaxLoc = axlePositions[0];
+                }
+                if (shearTotal > vMaxVal)
+                {
+                    vMaxVal = shearTotal;
+                    vMaxLoc = axlePositions[0];
+                }
+                for (int j = 0; j < axlePositions.Count(); j++)
+                {
+                    axlePositions[j] = axlePositions[j] + incr;
+                }
             }
 
-            Tuple<double, int> mMaxVals = FindMax(mArray);
-            Tuple<double, int> vMaxVals = FindMax(vArray);
+            double mMax = mMaxVal * (1 + impactFactor) * distFactor;
+            double vMax = vMaxVal * (1 + impactFactor) * distFactor;
+            Dictionary<string, double> result = new Dictionary<string, double>();
+            result.Add("m", mMax);
+            result.Add("v", vMax);
+            result.Add("mloc", mMaxLoc);
+            result.Add("vloc", vMaxLoc);
+            return result;
+        }
 
-            double mMax = mMaxVals.Item1 * (1 + impactFactor) * distFactor;
-            double vMax = vMaxVals.Item1 * (1 + impactFactor) * distFactor;
-            double mMaxLoc = positions[mMaxVals.Item2];
-            double vMaxLoc = positions[vMaxVals.Item2];
+        public void Calculate()
+        {
+            double spanLength = 0;
+            double xLocation = 0;
+            bool? feet = false;
+            bool? pct = false;
 
+            try
+            {
+                spanLength = double.Parse(SpanLength.Text);
+                xLocation = double.Parse(xLoc.Text);
+                feet = RadioFeet.IsChecked;
+                pct = RadioPct.IsChecked;
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Invalid input!");
+            }
+            if ((bool)pct)
+            {
+                xLocation = spanLength * xLocation;
+            }
+
+            Dictionary<string,double> vals = CalculateLocation(xLocation);
+            double mMax = vals["m"];
+            double vMax = vals["v"];
+            double mMaxLoc = vals["mloc"];
+            double vMaxLoc = vals["vloc"];
             MomentResult.Text = $"The maximum moment {mMax:0.00} k-ft occurs while the front of the train is at {mMaxLoc:0.00} ft.";
             ShearResult.Text = $"The maximum shear {vMax:0.00} k occurs while the front of the train is at {vMaxLoc:0.00} ft.";
         }
@@ -191,10 +223,9 @@ namespace MVCalc
         {
             double spanLength = 0;
             Tuple<double[], double[]> vals = new Tuple<double[], double[]>(null,null);
-
+            vals = CalculateEnv();
             try
             {
-                vals = CalculateEnv();
                 spanLength = double.Parse(SpanLength.Text);
             }
             catch (Exception)
@@ -212,17 +243,11 @@ namespace MVCalc
         public Tuple<double[], double[]> CalculateEnv()
         {
             double spanLength = 0;
-            double incr = 0;
-            double impactFactor = 0;
-            double distFactor = 0;
             int plotPoints = 0;
 
             try
             {
                 spanLength = double.Parse(SpanLength.Text);
-                incr = double.Parse(Increment.Text) / 12;
-                impactFactor = double.Parse(ImpactFactor.Text);
-                distFactor = double.Parse(DistributionFactor.Text);
                 plotPoints = int.Parse(PlotPoints.Text);
             }
             catch (Exception)
@@ -232,107 +257,18 @@ namespace MVCalc
 
 
             double[] locations = new double[plotPoints + 1];
+            double[] mMaxs = new double[plotPoints + 1];
+            double[] vMaxs = new double[plotPoints + 1];
 
             for (int i = 0; i < plotPoints+1; ++i)
             {
                 locations[i] = spanLength / (plotPoints) * i;
+                Dictionary<string, double> vals = CalculateLocation(locations[i]);
+                mMaxs[i] = vals["m"];
+                vMaxs[i] = vals["v"];
             }
 
-            double[] maxMs = new double[plotPoints + 1];
-            double[] maxVs = new double[plotPoints + 1];
-
-
-            for (int k = 0; k < plotPoints/2 + 1; ++k)
-            {
-                List<int> axleLoads = new List<int> { 40, 80, 80, 80, 80, 52, 52, 52, 52,
-                                                      40, 80, 80, 80, 80, 52, 52, 52, 52, 8 };
-                List<double> axleSpaces = new List<double> { 0, 8, 5, 5, 5, 9, 5, 6, 5,
-                                                         8, 8, 5, 5, 5, 9, 5, 6, 5, 5.5 };
-
-                double trainLen = axleSpaces.Sum();
-                while (axleSpaces.Sum() - trainLen < spanLength)
-                {
-                    axleSpaces.Add(1);
-                    axleLoads.Add(8);
-                }
-
-                int numAxles = axleLoads.Count();
-                double trainTot = axleSpaces.Sum();
-
-                List<double> positions = new List<double> { };
-                double point = -spanLength;
-                while (point <= trainTot)
-                {
-                    positions.Add(point);
-                    point += incr;
-                }
-
-                List<double> mArray = new List<double> { };
-                List<double> vArray = new List<double> { };
-
-                for (int i = 0; i < positions.Count(); ++i)
-                {
-                    List<double> a = new List<double> { };
-                    List<double> b = new List<double> { };
-                    List<double> r1 = new List<double> { };
-                    List<double> r2 = new List<double> { };
-                    List<double> m = new List<double> { };
-                    List<double> v = new List<double> { };
-
-                    for (int j = 0; j < numAxles; ++j)
-                    {
-                        double aVal = spanLength + positions[i] - axleSpaces.Take(j + 1).Sum();
-                        a.Add(aVal);
-
-                        double bVal = spanLength - aVal;
-                        b.Add(bVal);
-
-                        double mVal;
-                        if ((0 < bVal) && (bVal < spanLength) && (aVal > locations[k]))
-                            mVal = axleLoads[j] * (aVal - locations[k]);
-                        else
-                            mVal = 0;
-                        m.Add(mVal);
-
-                        double vVal;
-                        if ((0 < bVal) && (bVal < spanLength) && (aVal < locations[k]))
-                            vVal = axleLoads[j];
-                        else
-                            vVal = 0;
-                        v.Add(vVal);
-
-                        double r1Val;
-                        r1Val = ((bVal > 0) && (bVal < spanLength)) ? axleLoads[j] * bVal / spanLength : 0;
-                        r1.Add(r1Val);
-
-                        double r2Val;
-                        r2Val = ((0 < aVal) && (aVal < spanLength)) ? axleLoads[j] * aVal / spanLength : 0;
-                        r2.Add(r2Val);
-                    }
-
-                    double mTot = r2.Sum() * (spanLength - locations[k]) - m.Sum();
-                    double vTot = Math.Abs(r1.Sum() - v.Sum());
-                    mArray.Add(mTot);
-                    vArray.Add(vTot);
-                }
-
-                Tuple<double, int> mMaxVals = FindMax(mArray);
-                Tuple<double, int> vMaxVals = FindMax(vArray);
-
-                double mMax = mMaxVals.Item1 * (1 + impactFactor) * distFactor;
-                double vMax = vMaxVals.Item1 * (1 + impactFactor) * distFactor;
-
-                maxMs[k] = mMax;
-                maxVs[k] = vMax;
-            }
-
-            for (int i = plotPoints; i > plotPoints/2; --i)
-            {
-                maxMs[i] = maxMs[plotPoints - i];
-                maxVs[i] = maxVs[plotPoints - i];
-            }
-
-            return new Tuple<double[], double[]>(maxMs, maxVs);
+            return new Tuple<double[], double[]>(mMaxs, vMaxs);
         }
 
         public static PlotModel MPlot { get; set; }
