@@ -6,8 +6,105 @@
         xmlns:local="clr-namespace:MVCalc"
         mc:Ignorable="d"
         Title="Cooper E-80 Shear/Moment Calculator" Height="342" Width="538">
+    <Window.Resources>
+        <Style TargetType="TextBox" xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="BaseTextBox">
+            <Style.Resources>
+                <VisualBrush x:Key="CueBannerBrushDefault" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                    <VisualBrush.Visual>
+                        <Label Content="SomeText" Foreground="LightGray" />
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Style.Resources>
+            <Style.Triggers>
+                <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushDefault}" />
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushDefault}" />
+                </Trigger>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="Background" Value="White" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TextBox" BasedOn="{StaticResource BaseTextBox}" xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="SpanLengthTextBox">
+            <Style.Resources>
+                <VisualBrush x:Key="CueBannerBrushSpanLength" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                    <VisualBrush.Visual>
+                        <Label Content="50" Foreground="LightGray" />
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Style.Resources>
+            <Style.Triggers>
+                <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushSpanLength}" />
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushSpanLength}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TextBox" BasedOn="{StaticResource BaseTextBox}" xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="XLocationTextBox">
+            <Style.Resources>
+                <VisualBrush x:Key="CueBannerBrushXLocation" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                    <VisualBrush.Visual>
+                        <Label Content="0.5" Foreground="LightGray" />
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Style.Resources>
+            <Style.Triggers>
+                <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushXLocation}" />
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushXLocation}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TextBox" BasedOn="{StaticResource BaseTextBox}" xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="IncrementTextBox">
+            <Style.Resources>
+                <VisualBrush x:Key="CueBannerBrushIncrement" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                    <VisualBrush.Visual>
+                        <Label Content="6" Foreground="LightGray" />
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Style.Resources>
+            <Style.Triggers>
+                <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushIncrement}" />
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushIncrement}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TextBox" BasedOn="{StaticResource BaseTextBox}" xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="ImpactDistTextBox">
+            <Style.Resources>
+                <VisualBrush x:Key="CueBannerBrushImpactDist" AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                    <VisualBrush.Visual>
+                        <Label Content="1.0" Foreground="LightGray" />
+                    </VisualBrush.Visual>
+                </VisualBrush>
+            </Style.Resources>
+            <Style.Triggers>
+                <Trigger Property="Text" Value="{x:Static sys:String.Empty}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushImpactDist}" />
+                </Trigger>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Background" Value="{StaticResource CueBannerBrushImpactDist}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+    </Window.Resources>
+    
     <Grid >
         <Grid.RowDefinitions>
+            <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
@@ -25,36 +122,42 @@
         </Grid.ColumnDefinitions>
         <TextBlock Text="Cooper E-80 Shear/Moment Calculator" Grid.Row="0" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Center" Grid.Column="0" Grid.ColumnSpan="3"/>
 
-        <TextBlock Text="Span Length" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" Height="16" Width="66"/>
-        <TextBox Name="SpanLength" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,7" Height="22"></TextBox>
-        <TextBlock Text="ft" Grid.Column="2" Grid.Row="1" VerticalAlignment="Center" Height="16" Margin="0,10"></TextBlock>
+        <TextBlock Text="Loading" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+        <ComboBox Name="LoadType" Grid.Column="1" Grid.Row="1" Margin="4,4,4,4">
+            <ComboBoxItem IsSelected="true">Cooper E-80</ComboBoxItem>
+            <ComboBoxItem>E-80 Alternate</ComboBoxItem>
+        </ComboBox>
 
-        <TextBlock Text="x-Location" Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,9" Height="16" Width="55"></TextBlock>
-        <TextBox Name="xLoc" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,6,10,7" Height="22"></TextBox>
-        <RadioButton GroupName="LocationType" Name="RadioFeet" Grid.Column="2" Grid.Row="2" IsChecked="True" VerticalAlignment="Center"></RadioButton>
-        <TextBlock Text="ft" Grid.Column="2" Grid.Row="2" Margin="15,0,0,0" VerticalAlignment="Center"></TextBlock>
-        <RadioButton GroupName="LocationType" Name="RadioPct" Grid.Column="2" Grid.Row="2" IsChecked="False" VerticalAlignment="Center" Margin="35,0,0,0" Height="12"></RadioButton>
-        <TextBlock Text="fraction" Grid.Column="2" Grid.Row="2" Margin="50,0,0,0" VerticalAlignment="Center" Height="16"></TextBlock>
+        <TextBlock Text="Span Length" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+        <TextBox Name="SpanLength" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="10,7" Height="22"  Style="{StaticResource SpanLengthTextBox}"></TextBox>
+        <TextBlock Text="ft" Grid.Column="2" Grid.Row="2" VerticalAlignment="Center" Margin="0,10"></TextBlock>
 
-        <TextBlock Text="Increment" Grid.Column="0" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,10,10,10" Height="16" Width="53"></TextBlock>
-        <TextBox Name="Increment" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,7" Height="22"></TextBox>
-        <TextBlock Text="inches" Grid.Column="2" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Left" Height="16" Margin="0,10" Width="33"></TextBlock>
+        <TextBlock Text="x-Location" Grid.Column="0" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"></TextBlock>
+        <TextBox Name="xLoc" Style="{StaticResource XLocationTextBox}" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,6,10,7" Height="22"></TextBox>
+        <RadioButton GroupName="LocationType" Name="RadioFeet" Grid.Column="2" Grid.Row="3" IsChecked="False" VerticalAlignment="Center"></RadioButton>
+        <TextBlock Text="ft" Grid.Column="2" Grid.Row="3" Margin="15,0,0,0" VerticalAlignment="Center"></TextBlock>
+        <RadioButton GroupName="LocationType" Name="RadioPct" Grid.Column="2" Grid.Row="3" IsChecked="True" VerticalAlignment="Center" Margin="35,0,0,0" Height="12"></RadioButton>
+        <TextBlock Text="fraction" Grid.Column="2" Grid.Row="3" Margin="50,0,0,0" VerticalAlignment="Center"></TextBlock>
 
-        <TextBlock Text="Impact Factor" Grid.Column="0" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"></TextBlock>
-        <TextBox Name="ImpactFactor" Grid.Column="1" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,7" Height="22"></TextBox>
+        <TextBlock Text="Increment" Grid.Column="0" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,10"></TextBlock>
+        <TextBox Name="Increment" Style="{StaticResource IncrementTextBox}" Grid.Column="1" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,7" Height="22" ></TextBox>
+        <TextBlock Text="inches" Grid.Column="2" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Left" Height="16" Margin="0,10"></TextBlock>
 
-        <TextBlock Text="Distribution Factor" Grid.Column="0" Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"></TextBlock>
-        <TextBox Name="DistributionFactor" Grid.Column="1" Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,7" Height="22"></TextBox>
+        <TextBlock Text="Impact Factor" Grid.Column="0" Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"></TextBlock>
+        <TextBox Name="ImpactFactor" Style="{StaticResource ImpactDistTextBox}" Grid.Column="1" Grid.Row="5" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,7" Height="22"></TextBox>
 
-        <TextBlock FontWeight="Bold" Name="MomentResult" Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center"></TextBlock>
-        <TextBlock FontWeight="Bold" Name="ShearResult" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center"></TextBlock>
+        <TextBlock Text="Distribution Factor" Grid.Column="0" Grid.Row="6" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0"></TextBlock>
+        <TextBox Name="DistributionFactor" Style="{StaticResource ImpactDistTextBox}" Grid.Column="1" Grid.Row="6" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,7" Height="22"></TextBox>
 
-        <Button Grid.Column="2" Grid.Row="4" Margin="25,5" Content="Calculate" Click="calculateClick"></Button>
-        <Button Grid.Column="2" Grid.Row="5" Margin="25,5" Content="Reset" Click="clearClick"></Button>
+        <TextBlock FontWeight="Bold" Name="MomentResult" Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center"></TextBlock>
+        <TextBlock FontWeight="Bold" Name="ShearResult" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center"></TextBlock>
 
-        <TextBlock Text="Points" Grid.Row="8" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center"></TextBlock>
-        <TextBox Name="PlotPoints" Grid.Column="1" Grid.Row="8" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,7" Height="22"></TextBox>
-        <Button Grid.Column="3" Grid.Row="8" Margin="25,5,125,5" Content="Plot Envelope" Click="plotClick"></Button>
-        <Button Grid.Column="3" Grid.Row="8" Margin="125,5,25,5" Content="Show Values" Click="valClick"></Button>
+        <Button Grid.Column="2" Grid.Row="5" Margin="25,4" Content="Calculate" Click="CalculateClick"></Button>
+        <Button Grid.Column="2" Grid.Row="6" Margin="25,4" Content="Reset" Click="ClearClick"></Button>
+
+        <TextBlock Text="Points" Grid.Row="9" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0" VerticalAlignment="Center"></TextBlock>
+        <TextBox Name="PlotPoints" Style="{StaticResource SpanLengthTextBox}" Grid.Column="1" Grid.Row="9" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="10,7" Height="22"></TextBox>
+        <Button Grid.Column="2" Grid.Row="9" Margin="25,4,0,4" Content="Plot Envelope" Click="PlotClick" HorizontalAlignment="Left" Width="87"/>
+        <Button Grid.Column="2" Grid.Row="9" Margin="0,4,25,4" Content="Show Values" Click="ValClick" HorizontalAlignment="Right" Width="87"/>
     </Grid>
 </Window>

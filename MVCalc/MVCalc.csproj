@@ -88,6 +88,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="E80Analysis.cs" />
+    <Compile Include="Train.cs" />
     <Compile Include="Plots.cs" />
     <Compile Include="PlotWindow.xaml.cs">
       <DependentUpon>PlotWindow.xaml</DependentUpon>
