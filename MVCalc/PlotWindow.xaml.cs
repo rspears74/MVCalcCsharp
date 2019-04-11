@@ -15,15 +15,15 @@ using OxyPlot;
 
 namespace MVCalc
 {
-    /// <summary>
-    /// Interaction logic for Window1.xaml
-    /// </summary>
-    public partial class PlotWindow : Window
-    {
-        public PlotWindow()
-        {
-            InitializeComponent();
-        }
+	/// <summary>
+	/// Interaction logic for Window1.xaml
+	/// </summary>
+	public partial class PlotWindow : Window
+	{
+		public PlotWindow()
+		{
+			InitializeComponent();
+		}
 
-    }
+	}
 }

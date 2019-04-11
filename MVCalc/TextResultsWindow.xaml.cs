@@ -14,14 +14,14 @@ using System.Windows.Shapes;
 
 namespace MVCalc
 {
-    /// <summary>
-    /// Interaction logic for TextResultsWindow.xaml
-    /// </summary>
-    public partial class TextResultsWindow : Window
-    {
-        public TextResultsWindow()
-        {
-            InitializeComponent();
-        }
-    }
+	/// <summary>
+	/// Interaction logic for TextResultsWindow.xaml
+	/// </summary>
+	public partial class TextResultsWindow : Window
+	{
+		public TextResultsWindow()
+		{
+			InitializeComponent();
+		}
+	}
 }
