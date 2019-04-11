@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MVCalc
 {
-    class Train
+    public class Train
     {
         public List<double> AxleLoads { get; set; }
         public List<double> AxleSpaces { get; set; }

@@ -9,7 +9,7 @@ using System.Windows.Controls;
 
 namespace MVCalc
 {
-    class E80Analysis
+    public class E80Analysis
     {
 
         public Train AnalysisTrain { get; set; }
